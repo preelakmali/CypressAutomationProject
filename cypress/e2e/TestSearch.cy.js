@@ -10,12 +10,12 @@ describe('Search Functionality', () => {
         homePage.visit();
     });
 
-    //01
+    //02
     it('Home Page should load properly', () => {
         homePage.verifyHomePageLoaded();
     });
 
-    //02
+    //03
     it('Search layout should load and perform search', () => {
         // Ensure the search layout is visible
         homePage.verifySearchLayout();

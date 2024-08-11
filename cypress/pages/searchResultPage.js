@@ -1,22 +1,27 @@
+// searchResultsPage.js
+
+import "cypress-real-events/support";
+
 class SearchResultsPage {
-    // Locators
-    productLinkLocator = 'a[data-id="40611284844631"]';
-    dropdownOptionsLocator = '.kuDropdownOptions';
-    sortByDropdownLocator = '.kuDropSortBy > .kuDropdownLabel';
-    sortByOptionLocator = '.kuDropdownOptions div.kuDropOption';
-    productPriceLocator = '[data-testid="product-price"]';
-    productItemLocator = '.klevuProduct grid-product__has-quick-shop';
-    
+    // Define locators as private properties
+    #locators = {
+        PRODUCT_LINK: 'a[data-id="40611284844631"]',
+        DROPDOWN_OPTIONS: '.kuDropdownOptions',
+        SORT_BY_DROPDOWN: 'div[role="listbox"] div[class="kuDropdownLabel"]',
+        SORT_BY_OPTION: '.kuDropdownOptions div.kuDropOption',
+        PRODUCT_PRICE: '[data-testid="product-price"]',
+        PRODUCT_ITEM: 'a[title="Ascending Track"]',
+        VISIBLE_PRICE: 'span.kuSalePrice.kuSpecialPrice:visible',
+    };
 
-    
-
-    // Actions
+    // Method to visit the search results page
     visit() {
         cy.visit('https://faoschwarz.com/pages/search-results?type=product%2Carticle%2Cpage%2Ccollection&options%5Bprefix%5D=last&q=cars');
     }
 
+    // Method to verify a product is visible
     verifyProductIsVisible() {
-        cy.get(this.productLinkLocator, { timeout: 10000 })
+        cy.get(this.#locators.PRODUCT_LINK, { timeout: 10000 })
             .should('be.visible')
             .invoke('text')
             .then((text) => {
@@ -25,54 +30,69 @@ class SearchResultsPage {
             });
     }
 
+    // Method to sort search results from low to high
     sortResultsByLowToHigh() {
         // Ensure the dropdown options are initially not visible
-        cy.get(this.dropdownOptionsLocator, { timeout: 10000 })
+        cy.get(this.#locators.DROPDOWN_OPTIONS, { timeout: 10000 })
             .should('not.be.visible');
 
         // Trigger hover and click on the sort by dropdown to reveal options
-        cy.get(this.sortByDropdownLocator)
-            .trigger('mouseover')
-            .click();
+        cy.get(this.#locators.SORT_BY_DROPDOWN).realHover('mouse');
 
         // Ensure dropdown options are visible
-        cy.get(this.dropdownOptionsLocator, { timeout: 10000 })
+        cy.get(this.#locators.DROPDOWN_OPTIONS, { timeout: 10000 })
             .should('be.visible');
 
         // Click on the "Price: Low to high" option
-        cy.get(this.sortByOptionLocator)
+        cy.get(this.#locators.SORT_BY_OPTION)
             .contains('Price: Low to high', { matchCase: false })
             .should('be.visible')
             .click();
 
         // Optionally, verify that the dropdown label text has changed
-        cy.get(this.dropdownLabelLocator)
+        cy.get(this.#locators.DROPDOWN_OPTIONS)
             .should('contain.text', 'Price: Low to high');
     }
 
+    // Method to verify that the results are sorted by price
     verifyResultsSorted() {
-        // Verify that the results are sorted correctly
-        cy.get(this.productPriceLocator).then(($prices) => {
-            const priceArray = $prices.toArray().map(el => parseFloat(el.innerText.replace('$', '')));
-            const sortedPriceArray = [...priceArray].sort((a, b) => a - b);
-            expect(priceArray).to.deep.equal(sortedPriceArray);
-        });
+        cy.get(this.#locators.VISIBLE_PRICE)
+            .should('have.length.gt', 0)
+            .then(($prices) => {
+                // Extract text, convert to number, and create an array
+                const prices = [...$prices].map((price) => {
+                    const priceText = price.innerText.trim().replace('$', '').replace(',', '');
+                    const priceValue = parseFloat(priceText);
+                    console.log('priceValue:', priceValue);
+                    return priceValue;
+                });
+
+                // Check for NaN values
+                const hasNaN = prices.some(isNaN);
+                if (hasNaN) {
+                    cy.log('Warning: Some prices are NaN');
+                }
+
+                // Log the extracted prices
+                cy.log('Extracted Prices:' + prices);
+
+                // Create a sorted copy of the prices array for comparison
+                const sortedPrices = [...prices].sort((a, b) => a - b);
+
+                // Log the sorted prices
+                cy.log('Sorted Prices:' + sortedPrices);
+                console.log('Extracted Prices:', prices);
+                console.log('Sorted Prices:', sortedPrices);
+
+                // Assert that the original prices are sorted
+                expect(prices).to.deep.equal(sortedPrices);
+            });
     }
 
+    // Method to click on the first product in the search results
     clickFirstProduct() {
-        // Click the first product in the list
-        cy.get(this.productItemLocator).first().click();
-        
+        cy.get(this.#locators.PRODUCT_ITEM).first().click();
     }
-
-   
-
-
-
-   
-
-
 }
+
 export default SearchResultsPage;
-
-

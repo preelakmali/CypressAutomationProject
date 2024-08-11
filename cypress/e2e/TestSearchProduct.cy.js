@@ -41,8 +41,6 @@
 
         it('Validate the cart is showing correct product info', () => {
 
-        //     const expectedSubtotal = productPrice * 3;
-        // cartPage.verifySubtotal(expectedSubtotal);
         productPage.getProductPrice().then((price) => {
             productPrice = parseFloat(price.replace(/[^0-9.-]/g, '')); // Convert to number
             cy.log('Product Price:', productPrice);
@@ -52,6 +50,7 @@
         productPage.addToCart();
         cartPage.verifyDrawerVisible();
         cartPage.verifyQuantity();
+        cartPage.verifySubtotal(productPrice);
         cartPage.verifyRealTimeChatIconVisible();     
         });
     });
