@@ -3,6 +3,7 @@ import HomePage from '../pages/homePage';
 import ProductPage from '../pages/productPage';
 import CartPage from '../pages/cartPage';
 import SearchResultsPage from '../pages/searchResultPage';
+import { URLs, TEXTS } from '../support/constants';
 
 
 
@@ -19,6 +20,12 @@ describe('FAO Schwarz Shopping Flow UI Test', () => {
         homePage.visit();
         // Assertion: Home Page should load properly
         homePage.verifyHomePageLoaded();
+        //API verification 
+        cy.request(URLs.HOME_PAGE).then((response) => {
+          // Assert that the request was successful
+          expect(response.status).to.eq(200);
+        })
+    
 
         // Step 2: Click on Search button
         homePage.verifySearchLayout();

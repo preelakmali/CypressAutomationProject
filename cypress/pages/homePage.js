@@ -1,4 +1,6 @@
 
+import { URLs, TEXTS } from '../support/constants';
+
 class HomePage {
     // Define locators as private properties
     #locators = {
@@ -10,7 +12,7 @@ class HomePage {
 
     // Method to visit the home page
     visit() {
-        cy.visit('https://faoschwarz.com/search?q=cars');
+        cy.visit(URLs.HOME_PAGE);
     }
 
     // Method to verify the home page is loaded
